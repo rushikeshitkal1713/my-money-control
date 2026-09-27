@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.json">
+<title>My Money Control</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#111827;--muted:#667085;--line:#e5e7eb;--accent:#111827;--soft:#eef2f7}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}main{max-width:760px;margin:auto;padding:14px 14px 90px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.title{font-size:23px;font-weight:800}.muted{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:10px}.big{font-size:25px;font-weight:800;margin-top:4px}.small{font-size:18px;font-weight:750}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:7px 4px max(7px,env(safe-area-inset-bottom));z-index:10}.nav button{border:0;background:none;color:var(--muted);font-size:11px;padding:7px 2px;min-height:48px}.nav button.active{color:var(--text);font-weight:800;background:var(--soft);border-radius:12px}.nav span{display:block;font-size:18px}.primary,.secondary{width:100%;min-height:46px;border-radius:12px;padding:10px 13px;font-weight:750;font-size:15px}.primary{background:var(--accent);color:white;border:1px solid var(--accent)}.secondary{background:var(--soft);color:var(--text);border:1px solid var(--line)}button{cursor:pointer}input,select{width:100%;min-height:46px;border:1px solid #d6d9df;border-radius:11px;background:white;color:var(--text);padding:9px 11px;font-size:16px}label{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}.field{margin-bottom:12px}.bar{height:9px;background:var(--soft);border-radius:20px;overflow:hidden}.fill{height:100%;background:var(--accent);border-radius:20px}.expense{padding:12px 0;border-bottom:1px solid var(--line)}.expense:last-child{border-bottom:0}.hidden{display:none!important}.notice{background:var(--soft);padding:11px;border-radius:11px;font-size:13px}.danger{font-weight:750}.cat{margin:12px 0}.catbar{height:7px;background:var(--soft);border-radius:9px;overflow:hidden}.catfill{height:100%;background:var(--accent)}h2{font-size:18px;margin:4px 0 12px}@media(max-width:380px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><div><div class="title">My Money Control</div><div class="muted" id="month"></div></div><button id="reset" class="secondary" style="width:auto">Reset</button></div>
+
+<section id="dashboard">
+<div class="grid">
+<div class="card"><div class="muted">Monthly income</div><div id="income" class="big"></div></div>
+<div class="card"><div class="muted">Savings target</div><div id="target" class="big"></div></div>
+</div>
+<div class="grid">
+<div class="card"><div class="muted">Fixed commitments</div><div id="fixed" class="small"></div></div>
+<div class="card"><div class="muted">Spent</div><div id="spent" class="small"></div></div>
+</div>
+<div class="card">
+<div class="row"><div><b>Safe spending balance</b><div class="muted">After fixed costs + savings target</div></div><div id="remaining" class="big"></div></div>
+<div class="bar" style="margin-top:13px"><div id="spendbar" class="fill"></div></div>
+<div class="row" style="margin-top:7px"><span class="muted">Budget used</span><span id="used" class="muted"></span></div>
+</div>
+<div class="card">
+<div class="row"><div><b>Today's safe allowance</b><div class="muted">Adjusted for remaining days</div></div><div id="daily" class="big"></div></div>
+<button id="quickAdd" class="primary" style="margin-top:12px">+ Record expense</button>
+</div>
+<div id="alert" class="notice"></div>
+</section>
+
+<section id="add" class="hidden">
+<div class="card"><h2>Add Expense</h2>
+<div class="field"><label>Amount</label><input id="amount" type="number" min="1" inputmode="decimal" placeholder="₹ 0"></div>
+<div class="field"><label>Category</label><select id="category"><option>Food</option><option>Travel</option><option>Shopping</option><option>Entertainment</option><option>Subscriptions</option><option>Health / Medical</option><option>Gym / Fitness</option><option>Other</option></select></div>
+<div class="field"><label>Description</label><input id="note" maxlength="80" placeholder="e.g. Lunch, Uber, Coffee"></div>
+<div class="field"><label>Date</label><input id="date" type="date"></div>
+<button id="saveExpense" class="primary">Save expense</button><div id="addMsg" class="muted" style="margin-top:8px"></div>
+</div>
+</section>
+
+<section id="budget" class="hidden">
+<div class="card"><h2>Budget</h2>
+<div class="grid">
+<div class="field"><label>Income</label><input id="bIncome" type="number" inputmode="decimal"></div>
+<div class="field"><label>Savings target</label><input id="bSaving" type="number" inputmode="decimal"></div>
+</div>
+<b>Fixed expenses</b>
+<div class="grid" style="margin-top:10px">
+<div class="field"><label>Petrol</label><input id="bPetrol" type="number" inputmode="decimal"></div>
+<div class="field"><label>EMI</label><input id="bEmi" type="number" inputmode="decimal"></div>
+<div class="field"><label>SIP</label><input id="bSip" type="number" inputmode="decimal"></div>
+<div class="field"><label>Medical</label><input id="bMedical" type="number" inputmode="decimal"></div>
+</div>
+<button id="saveBudget" class="primary">Save budget</button>
+<div id="budgetSummary" class="notice" style="margin-top:10px"></div>
+</div>
+<div class="card"><div class="muted">Variable spending budget</div><div id="variable" class="big"></div><div class="muted">This is what you can spend after fixed commitments and your savings target.</div></div>
+<div class="card"><b>Category spending this month</b><div id="categories" style="margin-top:8px"></div></div>
+</section>
+
+<section id="savings" class="hidden">
+<div class="card"><h2>Savings</h2><div class="muted">Treat savings as a commitment, not leftover money.</div>
+<div class="grid" style="margin-top:14px"><div><div class="muted">Target</div><div id="sTarget" class="big"></div></div><div><div class="muted">SIP</div><div id="sSip" class="big"></div></div></div>
+<div style="margin-top:14px"><div class="bar"><div id="sbar" class="fill"></div></div><div class="row" style="margin-top:7px"><span class="muted">SIP progress toward target</span><span id="spct" class="muted"></span></div></div>
+</div>
+<div class="card"><div class="row"><span>Additional savings needed</span><b id="extra"></b></div><div class="notice" style="margin-top:12px">Recommended: transfer the additional savings soon after salary arrives, then spend only from the remaining budget.</div></div>
+</section>
+
+<section id="history" class="hidden">
+<div class="card"><div class="row"><h2>Monthly History</h2><select id="historyMonth" style="width:auto;max-width:145px"></select></div><div id="historyTotal" class="big"></div><div id="historyList"></div></div>
+</section>
+</main>
+
+<nav class="nav">
+<button data-page="dashboard" class="active"><span>⌂</span>Dashboard</button>
+<button data-page="add"><span>＋</span>Add</button>
+<button data-page="budget"><span>◫</span>Budget</button>
+<button data-page="savings"><span>₹</span>Savings</button>
+<button data-page="history"><span>☷</span>History</button>
+</nav>
+
+<script>
+const KEY='my-money-control-v1';
+const defaultState={budget:{income:33500,saving:10000,petrol:5000,emi:8500,sip:1000,medical:1500},expenses:[]};
+let state=load();
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||structuredClone(defaultState)}catch(e){return structuredClone(defaultState)}}
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function money(n){return '₹'+Math.round(Number(n)||0).toLocaleString('en-IN')}
+function keyOf(d){return d.slice(0,7)}
+function currentKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+function fixed(){const b=state.budget;return (+b.petrol||0)+(+b.emi||0)+(+b.sip||0)+(+b.medical||0)}
+function expensesFor(k){return state.expenses.filter(e=>keyOf(e.date)===k)}
+function total(a){return a.reduce((s,e)=>s+(+e.amount||0),0)}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){
+ const b=state.budget, k=currentKey(), ex=expensesFor(k), spent=total(ex), f=fixed(), variable=Math.max(0,(+b.income||0)-f-(+b.saving||0)), remaining=Math.max(0,variable-spent);
+ const now=new Date(), days=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(), daily=remaining/Math.max(1,days-now.getDate()+1), used=variable?Math.min(100,spent/variable*100):0;
+ document.getElementById('month').textContent=now.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+ document.getElementById('income').textContent=money(b.income);document.getElementById('target').textContent=money(b.saving);document.getElementById('fixed').textContent=money(f);document.getElementById('spent').textContent=money(spent);document.getElementById('remaining').textContent=money(remaining);document.getElementById('daily').textContent=money(daily);document.getElementById('used').textContent=Math.round(used)+'%';document.getElementById('spendbar').style.width=used+'%';
+ document.getElementById('alert').textContent=remaining<=0&&variable>0?'Variable spending budget exhausted. Protect your savings.':used>=80?'You have used over 80% of your spending budget.':'You are within your planned spending budget.';
+ document.getElementById('bIncome').value=b.income;document.getElementById('bSaving').value=b.saving;document.getElementById('bPetrol').value=b.petrol;document.getElementById('bEmi').value=b.emi;document.getElementById('bSip').value=b.sip;document.getElementById('bMedical').value=b.medical;
+ document.getElementById('variable').textContent=money(variable);document.getElementById('budgetSummary').textContent=money(b.income)+' − '+money(f)+' fixed − '+money(b.saving)+' savings = '+money(variable)+' spending budget.';
+ document.getElementById('sTarget').textContent=money(b.saving);document.getElementById('sSip').textContent=money(b.sip);document.getElementById('extra').textContent=money(Math.max(0,(+b.saving||0)-(+b.sip||0)));document.getElementById('sbar').style.width=(b.saving?Math.min(100,(+b.sip||0)/(+b.saving||1)*100):0)+'%';document.getElementById('spct').textContent=(b.saving?Math.round((+b.sip||0)/(+b.saving||1)*100):0)+'%';
+ renderCategories(ex);renderHistory();
+}
+function renderCategories(ex){const m={};ex.forEach(e=>m[e.category]=(m[e.category]||0)+(+e.amount||0));const t=total(ex);const el=document.getElementById('categories');el.innerHTML=Object.keys(m).length?Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`<div class="cat"><div class="row"><span>${esc(c)}</span><b>${money(v)}</b></div><div class="catbar"><div class="catfill" style="width:${t?Math.min(100,v/t*100):0}%"></div></div></div>`).join(''):'<div class="muted">No expenses yet.</div>'}
+function renderHistory(){const sel=document.getElementById('historyMonth');const keys=[...new Set([currentKey(),...state.expenses.map(e=>keyOf(e.date))])].sort().reverse();const old=sel.value;sel.innerHTML=keys.map(k=>`<option value="${k}">${new Date(k+'-01T00:00:00').toLocaleDateString('en-IN',{month:'short',year:'numeric'})}</option>`).join('');sel.value=keys.includes(old)?old:currentKey();const ex=expensesFor(sel.value);document.getElementById('historyTotal').textContent=money(total(ex));document.getElementById('historyList').innerHTML=ex.length?ex.slice().reverse().map(e=>`<div class="expense row"><div><b>${esc(e.note||e.category)}</b><div class="muted">${esc(e.category)} · ${esc(e.date)}</div></div><b>${money(e.amount)}</b></div>`).join(''):'<div class="muted" style="padding:12px 0">No expenses for this month.</div>'}
+function page(name){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));document.getElementById(name).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===name))}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>page(b.dataset.page));
+document.getElementById('quickAdd').onclick=()=>page('add');
+document.getElementById('date').value=new Date().toISOString().slice(0,10);
+document.getElementById('saveExpense').onclick=()=>{const amount=+document.getElementById('amount').value||0;if(amount<=0){document.getElementById('addMsg').textContent='Enter a valid amount.';return}state.expenses.push({amount,category:document.getElementById('category').value,note:document.getElementById('note').value.trim(),date:document.getElementById('date').value||new Date().toISOString().slice(0,10)});save();document.getElementById('amount').value='';document.getElementById('note').value='';document.getElementById('addMsg').textContent='Expense saved.';render();page('dashboard')};
+document.getElementById('saveBudget').onclick=()=>{state.budget={income:+document.getElementById('bIncome').value||0,saving:+document.getElementById('bSaving').value||0,petrol:+document.getElementById('bPetrol').value||0,emi:+document.getElementById('bEmi').value||0,sip:+document.getElementById('bSip').value||0,medical:+document.getElementById('bMedical').value||0};save();render()};
+document.getElementById('historyMonth').onchange=renderHistory;
+document.getElementById('reset').onclick=()=>{if(confirm('Reset budget and all expenses?')){state=structuredClone(defaultState);save();render()}};
+render();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
